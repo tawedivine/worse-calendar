@@ -27,29 +27,39 @@ type Props = {
   now: CatParts
   onCreate: (day: WallDate, hour: number) => void
   onDelete: (id: string) => void
+  /** Vertical hour-spacing multiplier for this column only. Hour labels never change; only this does. */
+  speed?: number
+  /** How long geometry changes to `speed` take to settle, in ms. */
+  transitionMs?: number
 }
 
-export function DayColumn({ day, events, now, onCreate, onDelete }: Props) {
+export function DayColumn({ day, events, now, onCreate, onDelete, speed = 1, transitionMs = 0 }: Props) {
   const dayEvents = events.filter((e) => sameWallDay(catParts(e.startUTC), day))
+  // Higher speed compresses (less px/hour); lower speed stretches (more px/hour).
+  const rowH = HOUR_HEIGHT / speed
+  const geomTransition = transitionMs > 0 ? `top ${transitionMs}ms linear, height ${transitionMs}ms linear` : undefined
 
   return (
-    <div className="relative border-l border-gray-200" style={{ height: 24 * HOUR_HEIGHT }}>
+    <div
+      className="relative"
+      style={{ height: 24 * rowH, transition: transitionMs > 0 ? `height ${transitionMs}ms linear` : undefined }}
+    >
       {/* hour slots — click to create */}
       {Array.from({ length: 24 }, (_, h) => (
         <div
           key={h}
           onClick={() => onCreate(day, h)}
           className="hov surf relative cursor-pointer"
-          style={{ height: HOUR_HEIGHT }}
+          style={{ height: rowH, transition: transitionMs > 0 ? `height ${transitionMs}ms linear` : undefined }}
         />
       ))}
 
       {/* events */}
       {dayEvents.map((e) => {
         const p = catParts(e.startUTC)
-        const top = (p.hh + p.mm / 60) * HOUR_HEIGHT
+        const top = (p.hh + p.mm / 60) * rowH
         const durHours = (new Date(e.endUTC).getTime() - new Date(e.startUTC).getTime()) / 3_600_000
-        const height = Math.max((durHours > 0 ? durHours : 1) * HOUR_HEIGHT - 2, 20)
+        const height = Math.max((durHours > 0 ? durHours : 1) * rowH - 2, 20)
         return (
           <button
             key={e.id}
@@ -58,7 +68,7 @@ export function DayColumn({ day, events, now, onCreate, onDelete }: Props) {
               onDelete(e.id)
             }}
             className="absolute right-1 left-1 overflow-hidden rounded-md border border-gray-200 px-2 py-1 text-left whitespace-nowrap text-white shadow-sm"
-            style={{ top, height, backgroundColor: randomSwatch() }}
+            style={{ top, height, backgroundColor: randomSwatch(), transition: geomTransition }}
           >
             <div className="text-[11px]" style={{ fontWeight: randomWeight() }}>
               {clamp8(e.title)}
@@ -75,7 +85,7 @@ export function DayColumn({ day, events, now, onCreate, onDelete }: Props) {
       {sameWallDay(now, day) && (
         <div
           className="pointer-events-none absolute right-0 left-0 border-t border-gray-200"
-          style={{ top: (now.hh + now.mm / 60) * HOUR_HEIGHT }}
+          style={{ top: (now.hh + now.mm / 60) * rowH, transition: transitionMs > 0 ? `top ${transitionMs}ms linear` : undefined }}
         />
       )}
     </div>

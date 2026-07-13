@@ -20,7 +20,7 @@ export function DayView({ day, events, now, onCreate, onDelete }: Props) {
     <div ref={scrollRef} className="flex-1 overflow-auto">
       <div className="flex min-h-full">
         <HourGutter />
-        <div className="flex-1">
+        <div className="flex-1 border-l border-gray-200">
           <DayColumn day={day} events={events} now={now} onCreate={onCreate} onDelete={onDelete} />
         </div>
       </div>

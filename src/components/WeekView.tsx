@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import type { CalEvent, WallDate } from '../types'
 import { sameWallDay, wallDow, weekDays, type CatParts } from '../catTime'
 import { useInvertedScroll } from '../hooks'
+import { useMonkeys } from '../monkeys'
 import { columnGrow } from '../palette'
 import { DayColumn, HourGutter } from './DayColumn'
 
@@ -22,6 +23,7 @@ export function WeekView({ focus, events, now, onCreate, onDelete }: Props) {
   const displayDays = [...naturalDays].reverse() // Saturday..Sunday, left to right
   const scrollRef = useRef<HTMLDivElement>(null)
   useInvertedScroll(scrollRef)
+  const { speedForDow, transitionMs } = useMonkeys()
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -60,6 +62,7 @@ export function WeekView({ focus, events, now, onCreate, onDelete }: Props) {
           {displayDays.map((d) => (
             <div
               key={`${d.y}-${d.mo}-${d.d}`}
+              className="border-l border-gray-200"
               style={{ flexGrow: columnGrow(d.y, d.mo, d.d), flexBasis: 0 }}
             >
               <DayColumn
@@ -68,6 +71,8 @@ export function WeekView({ focus, events, now, onCreate, onDelete }: Props) {
                 now={now}
                 onCreate={onCreate}
                 onDelete={onDelete}
+                speed={speedForDow(wallDow(d))}
+                transitionMs={transitionMs}
               />
             </div>
           ))}
