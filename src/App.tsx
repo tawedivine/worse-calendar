@@ -167,7 +167,7 @@ export default function App() {
   )
 
   return (
-    <div className="flex h-full flex-col bg-white text-gray-900">
+    <div className="anti-calendar flex h-full flex-col bg-white text-gray-900">
       {/* header */}
       <header className="flex flex-wrap items-center gap-3 border-b border-gray-200 px-5 py-3">
         <h1 className="text-lg font-semibold tracking-tight">Calendar</h1>
